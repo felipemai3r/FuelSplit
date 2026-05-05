@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TripService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">trips-charges-service</a> &gt; <a href="index.source.html" class="el_package">com.caronatracker.trips.service</a> &gt; <span class="el_source">TripService.java</span></div><h1>TripService.java</h1><pre class="source lang-java linenums">package com.caronatracker.trips.service;
+
+import com.caronatracker.trips.domain.model.Trip;
+import com.caronatracker.trips.domain.model.TripParticipant;
+import com.caronatracker.trips.dto.*;
+import com.caronatracker.trips.exception.BusinessException;
+import com.caronatracker.trips.messaging.TripEventPublisher;
+import com.caronatracker.trips.repository.TripParticipantRepository;
+import com.caronatracker.trips.repository.TripRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
+public class TripService {
+
+    private final TripRepository tripRepository;
+    private final TripParticipantRepository tripParticipantRepository;
+    private final TripEventPublisher tripEventPublisher;
+
+    public TripResponse registerTrip(TripRequest request) {
+<span class="fc" id="L30">        LocalDate date = LocalDate.parse(request.getDate());</span>
+
+        // REGRA 1: Data não pode ser futura
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (date.isAfter(LocalDate.now())) {</span>
+<span class="fc" id="L34">            throw new BusinessException(&quot;Trip date cannot be in the future&quot;, HttpStatus.BAD_REQUEST);</span>
+        }
+
+<span class="pc bpc" id="L37" title="1 of 4 branches missed.">        if (request.getParticipantIds() == null || request.getParticipantIds().isEmpty()) {</span>
+<span class="fc" id="L38">            throw new BusinessException(&quot;Participant list cannot be empty&quot;, HttpStatus.BAD_REQUEST);</span>
+        }
+
+        // REGRA 2: Calcular custo total
+<span class="fc" id="L42">        double rawCost = (request.getDistanceKm() / request.getFuelConsumptionKmL()) * request.getFuelPricePerLiter();</span>
+<span class="fc" id="L43">        double totalCost = BigDecimal.valueOf(rawCost)</span>
+<span class="fc" id="L44">                .setScale(2, RoundingMode.HALF_UP)</span>
+<span class="fc" id="L45">                .doubleValue();</span>
+
+        // REGRA 3: Custo por participante
+<span class="fc" id="L48">        double costPerParticipant = totalCost / request.getParticipantIds().size();</span>
+
+<span class="fc" id="L50">        Trip trip = Trip.builder()</span>
+<span class="fc" id="L51">                .groupId(request.getGroupId())</span>
+<span class="fc" id="L52">                .date(date)</span>
+<span class="fc" id="L53">                .distanceKm(request.getDistanceKm())</span>
+<span class="fc" id="L54">                .fuelConsumptionKmL(request.getFuelConsumptionKmL())</span>
+<span class="fc" id="L55">                .fuelPricePerLiter(request.getFuelPricePerLiter())</span>
+<span class="fc" id="L56">                .totalCost(totalCost)</span>
+<span class="fc" id="L57">                .build();</span>
+
+<span class="fc" id="L59">        List&lt;TripParticipant&gt; participants = request.getParticipantIds().stream()</span>
+<span class="fc" id="L60">                .map(userId -&gt; TripParticipant.builder()</span>
+<span class="fc" id="L61">                        .trip(trip)</span>
+<span class="fc" id="L62">                        .userId(userId)</span>
+<span class="fc" id="L63">                        .amountOwed(costPerParticipant)</span>
+<span class="fc" id="L64">                        .paid(false)</span>
+<span class="fc" id="L65">                        .build())</span>
+<span class="fc" id="L66">                .collect(Collectors.toList());</span>
+
+<span class="fc" id="L68">        trip.setParticipants(participants);</span>
+
+<span class="fc" id="L70">        Trip savedTrip = tripRepository.save(trip);</span>
+
+<span class="fc" id="L72">        tripEventPublisher.publishTripRegistered(buildEventPayload(savedTrip));</span>
+
+<span class="fc" id="L74">        return buildTripResponse(savedTrip);</span>
+    }
+
+    public List&lt;TripResponse&gt; getAllTrips(String groupId) {
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        List&lt;Trip&gt; trips = (groupId != null)</span>
+<span class="nc" id="L79">                ? tripRepository.findByGroupId(groupId)</span>
+<span class="fc" id="L80">                : tripRepository.findAll();</span>
+
+<span class="fc" id="L82">        return trips.stream().map(this::buildTripResponse).collect(Collectors.toList());</span>
+    }
+
+    public TripResponse getTripById(UUID id) {
+<span class="fc" id="L86">        Trip trip = tripRepository.findById(id)</span>
+<span class="pc" id="L87">                .orElseThrow(() -&gt; new BusinessException(&quot;Trip not found&quot;, HttpStatus.NOT_FOUND));</span>
+<span class="nc" id="L88">        return buildTripResponse(trip);</span>
+    }
+
+    public List&lt;TripResponse&gt; getDebtsByUserId(String userId) {
+<span class="nc" id="L92">        return tripParticipantRepository.findByUserIdAndPaidFalse(userId).stream()</span>
+<span class="nc" id="L93">                .map(p -&gt; buildTripResponse(p.getTrip()))</span>
+<span class="nc" id="L94">                .collect(Collectors.toList());</span>
+    }
+
+    public ParticipantResponse markParticipantAsPaid(UUID participantId) {
+<span class="fc" id="L98">        TripParticipant participant = tripParticipantRepository.findById(participantId)</span>
+<span class="pc" id="L99">                .orElseThrow(() -&gt; new BusinessException(&quot;Participant not found&quot;, HttpStatus.NOT_FOUND));</span>
+<span class="fc" id="L100">        participant.setPaid(true);</span>
+<span class="fc" id="L101">        TripParticipant saved = tripParticipantRepository.save(participant);</span>
+<span class="fc" id="L102">        return buildParticipantResponse(saved);</span>
+    }
+
+    private TripResponse buildTripResponse(Trip trip) {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        int size = (trip.getParticipants() != null) ? trip.getParticipants().size() : 0;</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        double costPerParticipant = (size &gt; 0) ? trip.getTotalCost() / size : 0.0;</span>
+
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        List&lt;ParticipantResponse&gt; participantResponses = (trip.getParticipants() != null)</span>
+<span class="fc" id="L110">                ? trip.getParticipants().stream().map(this::buildParticipantResponse).collect(Collectors.toList())</span>
+<span class="pc" id="L111">                : List.of();</span>
+
+<span class="fc" id="L113">        return TripResponse.builder()</span>
+<span class="fc" id="L114">                .id(trip.getId())</span>
+<span class="fc" id="L115">                .groupId(trip.getGroupId())</span>
+<span class="fc" id="L116">                .date(trip.getDate())</span>
+<span class="fc" id="L117">                .distanceKm(trip.getDistanceKm())</span>
+<span class="fc" id="L118">                .fuelConsumptionKmL(trip.getFuelConsumptionKmL())</span>
+<span class="fc" id="L119">                .fuelPricePerLiter(trip.getFuelPricePerLiter())</span>
+<span class="fc" id="L120">                .totalCost(trip.getTotalCost())</span>
+<span class="fc" id="L121">                .costPerParticipant(costPerParticipant)</span>
+<span class="fc" id="L122">                .participants(participantResponses)</span>
+<span class="fc" id="L123">                .createdAt(trip.getCreatedAt())</span>
+<span class="fc" id="L124">                .build();</span>
+    }
+
+    private ParticipantResponse buildParticipantResponse(TripParticipant p) {
+<span class="fc" id="L128">        return ParticipantResponse.builder()</span>
+<span class="fc" id="L129">                .id(p.getId())</span>
+<span class="fc" id="L130">                .userId(p.getUserId())</span>
+<span class="fc" id="L131">                .amountOwed(p.getAmountOwed())</span>
+<span class="fc" id="L132">                .paid(p.isPaid())</span>
+<span class="fc" id="L133">                .build();</span>
+    }
+
+    private TripEventPayload buildEventPayload(Trip trip) {
+<span class="fc" id="L137">        List&lt;TripEventPayload.ParticipantInfo&gt; infos = trip.getParticipants().stream()</span>
+<span class="fc" id="L138">                .map(p -&gt; TripEventPayload.ParticipantInfo.builder()</span>
+<span class="fc" id="L139">                        .userId(p.getUserId())</span>
+<span class="fc" id="L140">                        .amountOwed(p.getAmountOwed())</span>
+<span class="fc" id="L141">                        .build())</span>
+<span class="fc" id="L142">                .collect(Collectors.toList());</span>
+
+<span class="fc" id="L144">        return TripEventPayload.builder()</span>
+<span class="fc" id="L145">                .tripId(trip.getId())</span>
+<span class="fc" id="L146">                .groupId(trip.getGroupId())</span>
+<span class="fc" id="L147">                .date(trip.getDate())</span>
+<span class="fc" id="L148">                .totalCost(trip.getTotalCost())</span>
+<span class="fc" id="L149">                .participants(infos)</span>
+<span class="fc" id="L150">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

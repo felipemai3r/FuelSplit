@@ -1,0 +1,247 @@
+# =============================================================================
+# FuelSplit / Carona Tracker — Docker Compose Unificado
+# Trabalhos: DevOps (microsserviços) + Dispositivos Móveis (backend local)
+#
+# Subir tudo:           docker-compose up --build
+# Subir em background:  docker-compose up --build -d
+# Parar tudo:           docker-compose down
+# Parar + limpar dados: docker-compose down -v
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # BANCOS DE DADOS
+  # ---------------------------------------------------------------------------
+
+  # Banco do auth-service e users-groups-service
+  # Acesso externo (desenvolvimento local): localhost:5434
+  # Acesso interno (entre containers): postgres-auth:5432
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - carona-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d authdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Banco do trips-charges-service
+  # Acesso externo (desenvolvimento local): localhost:5433
+  # Acesso interno (entre containers): postgres-trips:5432
+  postgres-trips:
+    image: postgres:16-alpine
+    container_name: postgres-trips
+    environment:
+      POSTGRES_DB: tripsdb
+      POSTGRES_USER: trips_user
+      POSTGRES_PASSWORD: trips_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-trips-data:/var/lib/postgresql/data
+    networks:
+      - carona-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trips_user -d tripsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Banco exclusivo do SonarQube (qualidade de código)
+  # Acesso interno (entre containers): postgres-sonar:5432
+  postgres-sonar:
+    image: postgres:16-alpine
+    container_name: postgres-sonar
+    environment:
+      POSTGRES_DB: sonardb
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - postgres-sonar-data:/var/lib/postgresql/data
+    networks:
+      - carona-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonardb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # MENSAGERIA
+  # ---------------------------------------------------------------------------
+
+  # RabbitMQ — comunicação assíncrona entre serviços (padrão Event-Driven)
+  # AMQP (aplicação): localhost:5672
+  # Painel admin:     localhost:15672  (guest / guest)
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - carona-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # MICROSSERVIÇOS — BACKEND
+  # ---------------------------------------------------------------------------
+
+  # Auth Service (Felipe)
+  # Swagger: http://localhost:8081/swagger-ui.html
+  # Via Gateway: http://localhost:80/api/auth/
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres-auth
+      DB_NAME: authdb
+      DB_USER: auth_user
+      DB_PASS: auth_pass
+    networks:
+      - carona-network
+    restart: on-failure
+
+  # Users & Groups Service (Felipe)
+  # Swagger: http://localhost:8082/swagger-ui.html
+  # Via Gateway: http://localhost:80/api/users/
+  #              http://localhost:80/api/groups/
+  users-groups-service:
+    build:
+      context: ./user-group-service
+      dockerfile: Dockerfile
+    container_name: users-groups-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres-auth
+      DB_PORT: 5432
+      DB_NAME: authdb
+      DB_USER: auth_user
+      DB_PASS: auth_pass
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+    networks:
+      - carona-network
+    restart: on-failure
+
+  # Trips & Charges Service (Diogo)
+  # Swagger: http://localhost:8083/swagger-ui.html
+  # Via Gateway: http://localhost:80/api/trips/
+  trips-charges-service:
+    build:
+      context: ./trip-billing-service
+      dockerfile: Dockerfile
+    container_name: trips-charges-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres-trips:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres-trips
+      DB_NAME: tripsdb
+      DB_USER: trips_user
+      DB_PASS: trips_pass
+      RABBITMQ_HOST: rabbitmq
+    networks:
+      - carona-network
+    restart: on-failure
+
+  # ---------------------------------------------------------------------------
+  # API GATEWAY — Nginx
+  # Padrão: API Gateway (um dos 2 padrões exigidos pelo trabalho)
+  # Ponto de entrada único: http://localhost:80
+  # ---------------------------------------------------------------------------
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - auth-service
+      - users-groups-service
+      - trips-charges-service
+    networks:
+      - carona-network
+    restart: on-failure
+
+  # ---------------------------------------------------------------------------
+  # QUALIDADE — SonarQube
+  # Painel: http://localhost:9000  (admin / admin)
+  # Usado para verificar cobertura de testes (mínimo 50% exigido)
+  # ---------------------------------------------------------------------------
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonar:5432/sonardb
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+    depends_on:
+      postgres-sonar:
+        condition: service_healthy
+    networks:
+      - carona-network
+
+# =============================================================================
+# VOLUMES — dados persistentes entre restarts
+# =============================================================================
+volumes:
+  postgres-auth-data:
+  postgres-trips-data:
+  postgres-sonar-data:
+  rabbitmq-data:
+  sonarqube-data:
+  sonarqube-logs:
+
+# =============================================================================
+# REDE INTERNA
+# Todos os serviços se comunicam pelo nome do container como hostname
+# =============================================================================
+networks:
+  carona-network:
+    driver: bridge

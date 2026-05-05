@@ -1,0 +1,17 @@
+/app/src/main/java/com/caronatracker/trips/TripsChargesServiceApplication.java
+/app/src/main/java/com/caronatracker/trips/config/OpenApiConfig.java
+/app/src/main/java/com/caronatracker/trips/config/RabbitMQConfig.java
+/app/src/main/java/com/caronatracker/trips/controller/TripController.java
+/app/src/main/java/com/caronatracker/trips/domain/enums/PaymentStatus.java
+/app/src/main/java/com/caronatracker/trips/domain/model/Trip.java
+/app/src/main/java/com/caronatracker/trips/domain/model/TripParticipant.java
+/app/src/main/java/com/caronatracker/trips/dto/ParticipantResponse.java
+/app/src/main/java/com/caronatracker/trips/dto/TripEventPayload.java
+/app/src/main/java/com/caronatracker/trips/dto/TripRequest.java
+/app/src/main/java/com/caronatracker/trips/dto/TripResponse.java
+/app/src/main/java/com/caronatracker/trips/exception/BusinessException.java
+/app/src/main/java/com/caronatracker/trips/exception/GlobalExceptionHandler.java
+/app/src/main/java/com/caronatracker/trips/messaging/TripEventPublisher.java
+/app/src/main/java/com/caronatracker/trips/repository/TripParticipantRepository.java
+/app/src/main/java/com/caronatracker/trips/repository/TripRepository.java
+/app/src/main/java/com/caronatracker/trips/service/TripService.java

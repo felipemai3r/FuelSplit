@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TripController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">trips-charges-service</a> &gt; <a href="index.source.html" class="el_package">com.caronatracker.trips.controller</a> &gt; <span class="el_source">TripController.java</span></div><h1>TripController.java</h1><pre class="source lang-java linenums">package com.caronatracker.trips.controller;
+
+import com.caronatracker.trips.dto.ParticipantResponse;
+import com.caronatracker.trips.dto.TripRequest;
+import com.caronatracker.trips.dto.TripResponse;
+import com.caronatracker.trips.service.TripService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/api/trips&quot;)
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
+@Tag(name = &quot;Trips&quot;, description = &quot;Gerenciamento de viagens e cobranças&quot;)
+public class TripController {
+
+    private final TripService tripService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = &quot;Registrar uma nova viagem&quot;)
+    public TripResponse registerTrip(@RequestBody @Valid TripRequest request) {
+<span class="fc" id="L29">        return tripService.registerTrip(request);</span>
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = &quot;Listar viagens&quot;)
+    public List&lt;TripResponse&gt; getAllTrips(@RequestParam(required = false) String groupId) {
+<span class="fc" id="L36">        return tripService.getAllTrips(groupId);</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = &quot;Buscar viagem por ID&quot;)
+    public TripResponse getTripById(@PathVariable UUID id) {
+<span class="nc" id="L43">        return tripService.getTripById(id);</span>
+    }
+
+    @GetMapping(&quot;/debts/{userId}&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = &quot;Listar dívidas em aberto de um usuário&quot;)
+    public List&lt;TripResponse&gt; getDebtsByUserId(@PathVariable String userId) {
+<span class="nc" id="L50">        return tripService.getDebtsByUserId(userId);</span>
+    }
+
+    @PatchMapping(&quot;/participants/{participantId}/pay&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = &quot;Marcar participante como pago&quot;)
+    public ParticipantResponse markParticipantAsPaid(@PathVariable UUID participantId) {
+<span class="fc" id="L57">        return tripService.markParticipantAsPaid(participantId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

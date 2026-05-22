@@ -1,0 +1,17 @@
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\config\OpenApiConfig.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\config\RabbitMQConfig.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\controller\TripController.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\domain\enums\PaymentStatus.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\domain\model\Trip.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\domain\model\TripParticipant.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\dto\ParticipantResponse.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\dto\TripEventPayload.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\dto\TripRequest.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\dto\TripResponse.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\exception\BusinessException.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\exception\GlobalExceptionHandler.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\messaging\TripEventPublisher.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\repository\TripParticipantRepository.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\repository\TripRepository.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\service\TripService.java
+C:\Dev\carona-tracker\trips-charges-service\src\main\java\com\caronatracker\trips\TripsChargesServiceApplication.java

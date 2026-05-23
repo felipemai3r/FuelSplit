@@ -36,3 +36,5 @@ logging:
   level:
     com.caronatracker: DEBUG
     org.hibernate.SQL: DEBUG
+
+  # Ambiente: DEV - 23/05/2026

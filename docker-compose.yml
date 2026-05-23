@@ -163,7 +163,7 @@ services:
   # Via Gateway: http://localhost:80/api/trips/
   trips-charges-service:
     build:
-      context: ./trip-billing-service
+      context: ./trips-charges-service
       dockerfile: Dockerfile
     container_name: trips-charges-service
     ports:

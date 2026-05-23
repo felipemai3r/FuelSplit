@@ -1,0 +1,30 @@
+# ============================================================
+# .gitignore — FuelSplit / Carona Tracker
+# ============================================================
+
+# Maven — arquivos compilados e gerados (NUNCA devem ir pro repo)
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs
+*.log
+
+# Variáveis de ambiente locais (NUNCA commitar)
+.env
+.env.local
+
+# Docker volumes locais
+docker-volumes/
+
+# SonarQube cache local
+.sonar/

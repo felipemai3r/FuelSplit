@@ -1,0 +1,43 @@
+# =============================================================
+# Dependabot — Monitoramento automático de dependências
+# Documentação: https://docs.github.com/en/code-security/dependabot
+#
+# O Dependabot verifica semanalmente se há:
+#   - Atualizações de versão disponíveis
+#   - Vulnerabilidades de segurança (CVEs)
+# E abre Pull Requests automáticos com as correções
+# =============================================================
+
+version: 2
+
+updates:
+
+  # Monitora as dependências Maven do trips-charges-service (Diogo)
+  - package-ecosystem: "maven"
+    directory: "/trips-charges-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "java"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Monitora as GitHub Actions do pipeline CI/CD
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

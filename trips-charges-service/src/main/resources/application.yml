@@ -37,4 +37,17 @@ logging:
     com.caronatracker: DEBUG
     org.hibernate.SQL: DEBUG
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
   # Ambiente: DEV - 23/05/2026

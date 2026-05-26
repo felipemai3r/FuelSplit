@@ -5,6 +5,9 @@ spring:
   application:
     name: users-groups-service
 
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:authdb}?currentSchema=users_groups
     username: ${DB_USER:auth_user}
@@ -29,8 +32,17 @@ spring:
     password: ${RABBITMQ_PASS:guest}
 
 jwt:
-  secret: fuelsplit-secret-key-256bits-minimum-required-here
+  secret: ${JWT_SECRET:fuelsplit-secret-key-256bits-minimum-required-here}
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

@@ -27,6 +27,21 @@ updates:
       prefix: "chore"
       include: "scope"
 
+  # Monitora as dependências Maven do user-group-service (Felipe)
+  - package-ecosystem: "maven"
+    directory: "/user-group-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "java"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
   # Monitora as GitHub Actions do pipeline CI/CD
   - package-ecosystem: "github-actions"
     directory: "/"

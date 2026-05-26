@@ -1,0 +1,42 @@
+# =============================================================
+# Prometheus — Configuração de coleta de métricas
+# =============================================================
+#
+# O Prometheus funciona no modelo "pull":
+# a cada intervalo definido, ele acessa o endpoint /actuator/prometheus
+# dos serviços configurados e armazena as métricas coletadas.
+#
+# Para acessar o painel do Prometheus: http://localhost:9090
+# =============================================================
+
+global:
+  scrape_interval: 15s      # Coleta métricas a cada 15 segundos
+  evaluation_interval: 15s  # Avalia regras de alerta a cada 15 segundos
+
+scrape_configs:
+
+  # Monitoramento do próprio Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Monitoramento do trips-charges-service
+  - job_name: 'trips-charges-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['trips-charges-service:8083']
+    # 'trips-charges-service' é o nome do container na rede Docker
+    # O Prometheus consegue resolver esse nome porque ambos estão
+    # na mesma rede (carona-network) definida no docker-compose.yml
+
+  # Monitoramento do auth-service
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['auth-service:8081']
+
+  # Monitoramento do users-groups-service
+  - job_name: 'users-groups-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['users-groups-service:8082']

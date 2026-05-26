@@ -13,14 +13,15 @@
 
     <groupId>com.caronatracker</groupId>
     <artifactId>trips-charges-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>trips-charges-service</name>
     <description>Trips and Charges Service for Carona Tracker</description>
 
     <properties>
          <java.version>17</java.version>
-         <sonar.host.url>http://sonarqube:9000</sonar.host.url>
-         <sonar.token>sqa_5dc83f42260235668e4f246845b634ae54c1ee87</sonar.token>
+         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+         <sonar.token>${env.SONAR_TOKEN}</sonar.token>
+         <sonar.organization>diogoruan</sonar.organization>
          <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
          <sonar.projectKey>trips-charges-service</sonar.projectKey>
         <sonar.projectName>Trips and Charges Service</sonar.projectName>
@@ -72,6 +73,16 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Actuator — expõe endpoints de monitoramento (/actuator/health, /actuator/prometheus) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- Micrometer Prometheus — formata as métricas no padrão que o Prometheus entende -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
     </dependencies>
 

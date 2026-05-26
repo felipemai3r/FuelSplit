@@ -1,0 +1,94 @@
+{
+  "title": "User Group Service",
+  "uid": "user-group-service",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requisições HTTP por Segundo",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"user-group-service\"}[1m])",
+          "legendFormat": "{{method}} {{uri}} {{status}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Latência HTTP p99 (ms)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{job=\"user-group-service\"}[1m])) * 1000",
+          "legendFormat": "p99 {{uri}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "JVM — Memória Usada (MB)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{job=\"user-group-service\"} / 1024 / 1024",
+          "legendFormat": "{{area}} — {{id}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "JVM — Threads Ativas",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 8, "w": 6, "h": 8 },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{job=\"user-group-service\"}",
+          "legendFormat": "Threads"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Taxa de Erros HTTP 5xx",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 8, "w": 6, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"user-group-service\", status=~\"5..\"}[1m]))",
+          "legendFormat": "Erros 5xx/s"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Uptime (segundos)",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 16, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "process_uptime_seconds{job=\"user-group-service\"}",
+          "legendFormat": "Uptime"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 6, "y": 16, "w": 12, "h": 4 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage{job=\"user-group-service\"}",
+          "legendFormat": "CPU"
+        }
+      ]
+    }
+  ]
+}

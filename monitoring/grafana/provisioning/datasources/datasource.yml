@@ -1,0 +1,22 @@
+# =============================================================
+# Grafana — Configuração automática do datasource Prometheus
+# =============================================================
+#
+# Este arquivo é carregado automaticamente pelo Grafana na
+# inicialização via "provisioning". Isso evita ter que configurar
+# manualmente o datasource toda vez que o container sobe.
+#
+# O Grafana vai aparecer já conectado ao Prometheus em:
+# http://localhost:3000  (admin / admin)
+# =============================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    # 'prometheus' é o nome do container na rede Docker
+    isDefault: true
+    editable: true

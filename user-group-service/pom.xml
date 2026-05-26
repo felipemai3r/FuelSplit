@@ -13,7 +13,7 @@
 
     <groupId>com.caronatracker</groupId>
     <artifactId>users-groups-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>users-groups-service</name>
     <description>Users and Groups Service placeholder for Carona Tracker</description>
 
@@ -22,6 +22,12 @@
         <lombok.version>1.18.38</lombok.version>
         <mockito.version>5.18.0</mockito.version>
         <byte-buddy.version>1.15.11</byte-buddy.version>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.token>${env.SONAR_TOKEN}</sonar.token>
+        <sonar.organization>felipemai3r</sonar.organization>
+        <sonar.projectKey>user-group-service</sonar.projectKey>
+        <sonar.projectName>Users and Groups Service</sonar.projectName>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
@@ -94,6 +100,16 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
+
+        <!-- Observabilidade -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -129,6 +145,11 @@
                 <configuration>
                     <argLine>@{argLine} -XX:+EnableDynamicAgentLoading --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.10.0.2594</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

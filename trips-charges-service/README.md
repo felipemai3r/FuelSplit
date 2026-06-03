@@ -233,3 +233,6 @@ cd trips-charges-service
 12 testes implementados:
 - `TripServiceTest` — 7 testes unitários das regras de negócio
 - `TripControllerTest` — 5 testes de integração dos endpoints REST
+
+
+---> Teste em sala - t01.

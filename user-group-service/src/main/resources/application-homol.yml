@@ -1,5 +1,18 @@
+# Swagger desabilitado em homol — API não deve ser navegável fora do DEV
 springdoc:
   swagger-ui:
     enabled: false
   api-docs:
     enabled: false
+
+spring:
+  jpa:
+    # Sobrescreve o show-sql: true do application.yml base
+    show-sql: false
+
+# Em homol só interessa ver warnings e erros, não o fluxo completo
+logging:
+  level:
+    com.caronatracker: INFO
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN

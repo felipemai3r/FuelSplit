@@ -89,7 +89,7 @@ jobs:
         # main    → tag 'homol' → imagem: felipemaier/user-group-service:homol
 
       - name: Build e push da imagem Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: user-group-service
           push: true

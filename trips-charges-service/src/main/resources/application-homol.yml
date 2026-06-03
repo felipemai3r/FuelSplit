@@ -1,0 +1,22 @@
+# =============================================================
+# Configurações específicas do ambiente de Homologação (HOMOL)
+# Este arquivo sobrescreve o application.yml quando o perfil
+# "homol" está ativo (variável SPRING_PROFILES_ACTIVE=homol)
+# =============================================================
+
+# Desabilita o Swagger/OpenAPI — exigência do professor para HOMOL
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+# Desabilita SQL no log — não faz sentido em homologação
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    com.caronatracker: INFO
+    org.hibernate.SQL: WARN

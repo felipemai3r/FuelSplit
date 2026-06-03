@@ -124,6 +124,38 @@ Projeto segue **Semantic Versioning (SemVer)**:
 
 ---
 
+## Contribuindo com Alterações
+
+### Fluxo completo via Git
+
+```bash
+# 1. Crie uma branch a partir de develop
+git checkout develop
+git pull origin develop
+git checkout -b feature/nome-da-feature
+
+# 2. Faça as alterações e commit
+git add .
+git commit -m "feat: descrição da alteração"
+
+# 3. Suba a branch para o remoto
+git push origin feature/nome-da-feature
+
+# 4. Merge em develop (aciona deploy no DEV)
+git checkout develop
+git merge feature/nome-da-feature
+git push origin develop
+
+# 5. Após validar no DEV, promova para main (aciona deploy no HOMOL)
+git checkout main
+git merge develop
+git push origin main
+```
+
+O push em `develop` ou `main` aciona automaticamente o pipeline de CI/CD.
+
+---
+
 ## Variáveis de Ambiente
 
 | Variável | Padrão (local) | Descrição |

@@ -56,7 +56,7 @@ jobs:
         working-directory: user-group-service
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_F }}
-        run: ./mvnw sonar:sonar -B
+        run: ./mvnw sonar:sonar -B -Dsonar.branch.name=${{ github.ref_name }}
 
   # ---------------------------------------------------------------------------
   # JOB 2: Build e Publicação da Imagem Docker

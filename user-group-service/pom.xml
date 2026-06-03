@@ -24,7 +24,7 @@
         <byte-buddy.version>1.15.11</byte-buddy.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.token>${env.SONAR_TOKEN}</sonar.token>
-        <sonar.organization>felipemai3r-WpSni@github</sonar.organization>
+        <sonar.organization>felipemai3r</sonar.organization>
         <sonar.projectKey>user-group-service</sonar.projectKey>
         <sonar.projectName>Users and Groups Service</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>

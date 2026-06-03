@@ -5,5 +5,6 @@ global:
 scrape_configs:
   - job_name: 'user-group-service'
     metrics_path: '/actuator/prometheus'
+    scheme: https
     static_configs:
-      - targets: ['user-group-service:8082']
+      - targets: ['user-group-service-dev.onrender.com']

@@ -235,4 +235,4 @@ cd trips-charges-service
 - `TripControllerTest` — 5 testes de integração dos endpoints REST
 
 
----> Teste em sala - t01.
+---> Teste em sala - t02

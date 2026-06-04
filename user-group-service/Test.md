@@ -1,6 +1,4 @@
-Vamos testar
-<<<<<<< HEAD
+Vamos testastar o processo 
 
-ajuste 
-=======
->>>>>>> develop
+aulka 
+
